@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 FIFA World Cup Draw</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f4f4;text-align:center;padding:20px}
+.container{max-width:600px;margin:auto}
+input,button{padding:12px;margin:5px;font-size:16px}
+#drawBox{background:white;padding:30px;border-radius:12px;margin:20px 0;font-size:32px;font-weight:bold;min-height:80px}
+table{width:100%;border-collapse:collapse;background:white}
+th,td{border:1px solid #ddd;padding:10px}
+button{cursor:pointer}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>2026 FIFA World Cup Draw</h1>
+
+<input id="firstName" placeholder="First Name">
+<input id="surname" placeholder="Surname"><br>
+
+<button onclick="spin()">SPIN</button>
+<button onclick="resetDraw()">RESET</button>
+
+<div id="drawBox">Press SPIN</div>
+
+<p><b>Remaining Teams:</b> <span id="remaining"></span></p>
+
+<h2>Assigned Teams</h2>
+<table>
+<thead><tr><th>Player</th><th>Country</th></tr></thead>
+<tbody id="board"></tbody>
+</table>
+</div>
+
+<script>
+const originalCountries=[
+"Algeria","Argentina","Australia","Austria","Belgium","Bosnia and Herzegovina",
+"Brazil","Canada","Cape Verde","Colombia","Croatia","Czechia","DR Congo",
+"Ecuador","Egypt","England","France","Germany","Ghana","Haiti","Iran","Iraq",
+"Ivory Coast","Japan","Jordan","Mexico","Morocco","Netherlands","New Zealand",
+"Norway","Panama","Paraguay","Portugal","Qatar","Saudi Arabia","Scotland",
+"Senegal","South Africa","South Korea","Spain","Sweden","Switzerland",
+"Tunisia","Türkiye","Uruguay","USA","Uzbekistan"
+];
+
+let countries=JSON.parse(localStorage.getItem("countries"))||[...originalCountries];
+let players=JSON.parse(localStorage.getItem("players"))||{};
+
+function save(){
+localStorage.setItem("countries",JSON.stringify(countries));
+localStorage.setItem("players",JSON.stringify(players));
+}
+
+function update(){
+document.getElementById("remaining").textContent=countries.length;
+let html="";
+for(const p in players){
+html+=`<tr><td>${p}</td><td>${players[p]}</td></tr>`;
+}
+document.getElementById("board").innerHTML=html;
+}
+
+function spin(){
+const f=document.getElementById("firstName").value.trim();
+const s=document.getElementById("surname").value.trim();
+
+if(!f||!s){alert("Enter first name and surname");return;}
+
+const name=f+" "+s;
+
+if(players[name]){
+alert("You already spun.");
+return;
+}
+
+if(countries.length===0){
+alert("No countries remaining.");
+return;
+}
+
+let count=0;
+const box=document.getElementById("drawBox");
+
+const anim=setInterval(()=>{
+box.innerHTML=countries[Math.floor(Math.random()*countries.length)];
+count++;
+if(count>25){
+clearInterval(anim);
+
+const index=Math.floor(Math.random()*countries.length);
+const country=countries[index];
+
+players[name]=country;
+countries.splice(index,1);
+
+save();
+update();
+
+box.innerHTML="⚽ "+country;
+}
+},100);
+}
+
+function resetDraw(){
+if(!confirm("Reset everything?")) return;
+localStorage.clear();
+countries=[...originalCountries];
+players={};
+document.getElementById("drawBox").innerHTML="Press SPIN";
+update();
+}
+
+update();
+</script>
+</body>
+</html>
