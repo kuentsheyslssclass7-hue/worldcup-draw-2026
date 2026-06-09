@@ -2,118 +2,51 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026 FIFA World Cup Draw</title>
-<style>
-body{font-family:Arial,sans-serif;background:#f4f4f4;text-align:center;padding:20px}
-.container{max-width:600px;margin:auto}
-input,button{padding:12px;margin:5px;font-size:16px}
-#drawBox{background:white;padding:30px;border-radius:12px;margin:20px 0;font-size:32px;font-weight:bold;min-height:80px}
-table{width:100%;border-collapse:collapse;background:white}
-th,td{border:1px solid #ddd;padding:10px}
-button{cursor:pointer}
-</style>
+<title>World Cup Draw Test</title>
 </head>
 <body>
-<div class="container">
-<h1>2026 FIFA World Cup Draw</h1>
 
-<input id="firstName" placeholder="First Name">
-<input id="surname" placeholder="Surname"><br>
+<h1>Firebase Connected ✅</h1>
 
-<button onclick="spin()">SPIN</button>
-<button onclick="resetDraw()">RESET</button>
+<div id="status">Loading...</div>
 
-<div id="drawBox">Press SPIN</div>
+<script type="module">
 
-<p><b>Remaining Teams:</b> <span id="remaining"></span></p>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<h2>Assigned Teams</h2>
-<table>
-<thead><tr><th>Player</th><th>Country</th></tr></thead>
-<tbody id="board"></tbody>
-</table>
-</div>
+const firebaseConfig = {
+  apiKey: "AIzaSyC-eLwyVInUcFLS2P_Tf3dcEXfBFd76szU",
+  authDomain: "worldcup-draw-2026.firebaseapp.com",
+  projectId: "worldcup-draw-2026",
+  storageBucket: "worldcup-draw-2026.firebasestorage.app",
+  messagingSenderId: "288717227669",
+  appId: "1:288717227669:web:5f3d99c26f01b243b2fd9c",
+  measurementId: "G-P10B445BBV"
+};
 
-<script>
-const originalCountries=[
-"Algeria","Argentina","Australia","Austria","Belgium","Bosnia and Herzegovina",
-"Brazil","Canada","Cape Verde","Colombia","Croatia","Czechia","DR Congo",
-"Ecuador","Egypt","England","France","Germany","Ghana","Haiti","Iran","Iraq",
-"Ivory Coast","Japan","Jordan","Mexico","Morocco","Netherlands","New Zealand",
-"Norway","Panama","Paraguay","Portugal","Qatar","Saudi Arabia","Scotland",
-"Senegal","South Africa","South Korea","Spain","Sweden","Switzerland",
-"Tunisia","Türkiye","Uruguay","USA","Uzbekistan","Curaçao"
-];
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-let countries=JSON.parse(localStorage.getItem("countries"))||[...originalCountries];
-let players=JSON.parse(localStorage.getItem("players"))||{};
+const docRef = doc(db, "draw", "state");
 
-function save(){
-localStorage.setItem("countries",JSON.stringify(countries));
-localStorage.setItem("players",JSON.stringify(players));
+try{
+    const snap = await getDoc(docRef);
+
+    if(snap.exists()){
+        document.getElementById("status").innerHTML =
+        "Firestore Connected Successfully 🚀";
+    }else{
+        document.getElementById("status").innerHTML =
+        "Document not found";
+    }
+
+}catch(err){
+    document.getElementById("status").innerHTML =
+    "Firebase Error: " + err.message;
 }
 
-function update(){
-document.getElementById("remaining").textContent=countries.length;
-let html="";
-for(const p in players){
-html+=`<tr><td>${p}</td><td>${players[p]}</td></tr>`;
-}
-document.getElementById("board").innerHTML=html;
-}
-
-function spin(){
-const f=document.getElementById("firstName").value.trim();
-const s=document.getElementById("surname").value.trim();
-
-if(!f||!s){alert("Enter first name and surname");return;}
-
-const name=f+" "+s;
-
-if(players[name]){
-alert("You already spun.");
-return;
-}
-
-if(countries.length===0){
-alert("No countries remaining.");
-return;
-}
-
-let count=0;
-const box=document.getElementById("drawBox");
-
-const anim=setInterval(()=>{
-box.innerHTML=countries[Math.floor(Math.random()*countries.length)];
-count++;
-if(count>25){
-clearInterval(anim);
-
-const index=Math.floor(Math.random()*countries.length);
-const country=countries[index];
-
-players[name]=country;
-countries.splice(index,1);
-
-save();
-update();
-
-box.innerHTML="⚽ "+country;
-}
-},100);
-}
-
-function resetDraw(){
-if(!confirm("Reset everything?")) return;
-localStorage.clear();
-countries=[...originalCountries];
-players={};
-document.getElementById("drawBox").innerHTML="Press SPIN";
-update();
-}
-
-update();
 </script>
+
 </body>
 </html>
